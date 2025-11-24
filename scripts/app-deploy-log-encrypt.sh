@@ -12,7 +12,7 @@ delete_cleartext() {
 }
 trap delete_cleartext EXIT
 
-sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.yml > "$PASSPHRASE"
+sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml > "$PASSPHRASE"
 
 touch /tmp/deploy.log
 gpg  -c --cipher-algo twofish --batch --passphrase-file "$PASSPHRASE" -o /tmp/deploy.log.gpg /tmp/deploy.log

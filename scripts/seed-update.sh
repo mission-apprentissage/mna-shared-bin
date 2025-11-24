@@ -40,7 +40,7 @@ delete_cleartext() {
 
 trap delete_cleartext EXIT
 
-sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.yml > "$PASSPHRASE"
+sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml > "$PASSPHRASE"
 
 docker compose -f "$ROOT_DIR/docker-compose.yml" up mongodb -d
 mkdir -p "$ROOT_DIR/.infra/files/mongodb"

@@ -35,7 +35,7 @@ check_for_main_key_rotation () {
 
   echo "-------------------------------------------------------"
 
-  for file in .infra/habilitations.yml .infra/env.yml .infra/env.*.yml; do
+  for file in .infra/habilitations.yml .infra/env.*.yml; do
 
     if [ ! -f $file ]; then
       continue 

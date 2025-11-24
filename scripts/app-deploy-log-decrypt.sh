@@ -29,6 +29,6 @@ rm -f /tmp/deploy.log.gpg
 
 gh run download "$RUN_ID" -n "logs-$JOB_ID" -D /tmp
 
-sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.yml > "$PASSPHRASE"
+sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml > "$PASSPHRASE"
 
 gpg -d --batch --passphrase-file "$PASSPHRASE" /tmp/deploy.log.gpg

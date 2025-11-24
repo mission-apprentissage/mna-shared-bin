@@ -40,7 +40,7 @@ delete_cleartext() {
 
 trap delete_cleartext EXIT
 
-sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.yml > "$PASSPHRASE"
+sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml > "$PASSPHRASE"
 
 rm -f "$SEED_GZ"
 gpg -d --batch --passphrase-file "$PASSPHRASE" -o "$SEED_GZ" "$SEED_GPG"
