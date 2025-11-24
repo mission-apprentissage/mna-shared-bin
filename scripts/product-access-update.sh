@@ -4,6 +4,8 @@ set -euo pipefail
 
 readonly HABILITATIONS_FILE="${ROOT_DIR}/.infra/habilitations.yml"
 
+"${SCRIPT_SHARED_DIR}/gpg-import-github-pubkey.sh"
+
 check_for_main_key_rotation () {
 
   echo "Extraction des clés OpenPGP du fichier d'habilitations..."
