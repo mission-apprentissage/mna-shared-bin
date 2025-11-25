@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if gpg -q -k EC088ADC52F85A180F660BF9BB6CD8AE1AABCE36 2>/dev/null; then
+if gpg -k EC088ADC52F85A180F660BF9BB6CD8AE1AABCE36 &>/dev/null; then
   exit 0
 fi
 
