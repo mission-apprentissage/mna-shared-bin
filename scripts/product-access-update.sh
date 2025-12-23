@@ -14,7 +14,7 @@ check_for_main_key_rotation () {
 
   local modified=false
 
-  if [ "$AUTHORIZATIONS" == "true" ]; then
+  if [ ! -z "$AUTHORIZATIONS" ]; then
     local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.openpgp-keyid"
   else
     local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
@@ -57,12 +57,12 @@ check_for_main_key_rotation () {
   for file in "$HABILITATIONS_FILE" .infra/env.*.yml; do
 
     if [ "$file" == "$HABILITATIONS_FILE" ] \
-      && [ "$AUTHORIZATIONS" != "true" ]; then
+      && [ -z "$AUTHORIZATIONS" ]; then
       continue
     fi
 
     if [ "$file" != "$HABILITATIONS_FILE" ] \
-      && [ "$AUTHORIZATIONS" == "true" ]; then
+      && [ ! -z "$AUTHORIZATIONS" ]; then
       continue
     fi
 
@@ -137,7 +137,7 @@ check_for_main_key_rotation () {
   done 
 
 
-  if [ "$AUTHORIZATIONS" == "true" ] \
+  if [ ! -z "$AUTHORIZATIONS" ] \
     && [ "$modified" == "true" ]; then
 
     local readonly product=$(git rev-parse --abbrev-ref HEAD)
