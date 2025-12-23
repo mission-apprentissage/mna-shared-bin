@@ -154,7 +154,16 @@ check_for_main_key_rotation () {
 HABILITATIONS_HASH=$(openssl dgst -sha256 -r "$HABILITATIONS_FILE" \
   | cut -d' ' -f 1)
 
-sops "$HABILITATIONS_FILE"
+if [ "$AUTHORIZATIONS" == "true" ]; then
+
+  sops "$HABILITATIONS_FILE"
+
+else
+
+  git submodule update --recursive --init "${ROOT_DIR}/.infra/authorizations"
+  git submodule update --recursive --remote "${ROOT_DIR}/.infra/authorizations"
+
+fi
 
 HABILITATIONS_NEW_HASH=$(openssl dgst -sha256 -r "$HABILITATIONS_FILE" \
   | cut -d' ' -f 1)
