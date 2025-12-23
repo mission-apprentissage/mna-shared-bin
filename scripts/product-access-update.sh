@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if [ "$AUTHORIZATIONS" == "true" ]; then
+if [ ! -z "$AUTHORIZATIONS" ]; then
   readonly HABILITATIONS_FILE="${ROOT_DIR}/habilitations.yml"
 else
   readonly HABILITATIONS_FILE="${ROOT_DIR}/.infra/authorizations/habilitations.yml"
