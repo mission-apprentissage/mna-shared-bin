@@ -144,7 +144,7 @@ check_for_main_key_rotation () {
 
     echo "Il est nécessaire de réaliser les actions suivantes sur le dépôt Git du projet '$product'"
     echo
-    echo "  $ .bin/mna-bal product:access:update"
+    echo "  $ .bin/mna product:access:update"
     echo "  $ git commit -m \"chore: mise à jour des habilitations\" .infra/authorizations/habilitations.yml"
     echo "  $ git push"
   fi
