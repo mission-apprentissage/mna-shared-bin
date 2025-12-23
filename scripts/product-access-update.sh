@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if [ ! -z "$AUTHORIZATIONS" ]; then
+if [ "$AUTHORIZATIONS" == "true" ]; then
   readonly HABILITATIONS_FILE="${ROOT_DIR}/habilitations.yml"
 else
   readonly HABILITATIONS_FILE="${ROOT_DIR}/.infra/authorizations/habilitations.yml"
@@ -14,7 +14,7 @@ check_for_main_key_rotation () {
 
   local modified=false
 
-  if [ ! -z "$AUTHORIZATIONS" ]; then
+ if [ "$AUTHORIZATIONS" == "true" ]; then
     local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.openpgp-keyid"
   else
     local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
@@ -57,12 +57,12 @@ check_for_main_key_rotation () {
   for file in "$HABILITATIONS_FILE" .infra/env.*.yml; do
 
     if [ "$file" == "$HABILITATIONS_FILE" ] \
-      && [ -z "$AUTHORIZATIONS" ]; then
+      && [ "$AUTHORIZATIONS" == "false" ]; then
       continue
     fi
 
     if [ "$file" != "$HABILITATIONS_FILE" ] \
-      && [ ! -z "$AUTHORIZATIONS" ]; then
+      && [ "$AUTHORIZATIONS" == "true" ]; then
       continue
     fi
 
@@ -137,7 +137,7 @@ check_for_main_key_rotation () {
   done 
 
 
-  if [ ! -z "$AUTHORIZATIONS" ] \
+  if [ "$AUTHORIZATIONS" == "true" ] \
     && [ "$modified" == "true" ]; then
 
     local readonly product=$(git rev-parse --abbrev-ref HEAD)
