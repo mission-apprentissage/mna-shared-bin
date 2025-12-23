@@ -25,7 +25,7 @@ check_for_main_key_rotation () {
     exit 1
   fi
 
-  GITHUB_KEYID=$(head -n 1 .openpgp-keyid | awk '{print $1}')
+  GITHUB_KEYID=$(head -n 1 "$GITHUB_KEYID_FILE" | awk '{print $1}')
 
   local recipients=("$GITHUB_KEYID")
 
