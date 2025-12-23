@@ -12,13 +12,15 @@ fi
 
 check_for_main_key_rotation () {
 
+  local modified=false
+
   if [ "$AUTHORIZATIONS" == "true" ]; then
     local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.openpgp-keyid"
   else
     local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
   fi
 
-  if [ ! -f "GITHUB_KEYID_FILE" ]; then
+  if [ ! -f "$GITHUB_KEYID_FILE" ]; then
     echo "Le fichier $GITHUB_KEYID_FILE est manquant !"
     exit 1
   fi
@@ -100,6 +102,7 @@ check_for_main_key_rotation () {
       if [ "$exist" = false ]; then
         echo "Ajout de la clé $keya"
         sops -i --rotate --add-pgp $keya "$file" 2>/dev/null
+        modified=true
       fi
 
     done 
@@ -124,6 +127,7 @@ check_for_main_key_rotation () {
       if [ "$exist" = false ]; then
         echo "Suppression de la clé $keya"
         sops -i --rotate --rm-pgp $keya "$file" 2>/dev/null
+        modified=true
       fi
 
     done 
@@ -131,6 +135,19 @@ check_for_main_key_rotation () {
     echo "-------------------------------------------------------"
 
   done 
+
+
+  if [ "$AUTHORIZATIONS" == "true" ] \
+    && [ "$modified" == "true" ]; then
+
+    local readonly product=$(git rev-parse --abbrev-ref HEAD)
+
+    echo "Il est nécessaire de réaliser les actions suivantes sur le dépôt Git du projet '$product'"
+    echo
+    echo "  $ .bin/mna-bal product:access:update"
+    echo "  $ git commit -m \"chore: mise à jour des habilitations\" .infra/authorizations/habilitations.yml"
+    echo "  $ git push"
+  fi
 
 }
 
