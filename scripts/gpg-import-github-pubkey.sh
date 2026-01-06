@@ -4,13 +4,13 @@ set -euo pipefail
 
 if [ "$AUTHORIZATIONS" == "true" ]; then
 
-  local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.openpgp-keyid"
-  local readonly GITHUB_PUBKEY_FILE="${ROOT_DIR}/.openpgp-pubkey"
+  readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.openpgp-keyid"
+  readonly GITHUB_PUBKEY_FILE="${ROOT_DIR}/.openpgp-pubkey"
 
 else
 
-  local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
-  local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-pubkey"
+  readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
+  readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-pubkey"
 
 fi
 
