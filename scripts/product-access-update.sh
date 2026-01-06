@@ -82,6 +82,13 @@ check_for_main_key_rotation () {
       if [ "$exist" = false ]; then
         echo "Ajout de la clé $keya"
         sops -i --rotate --add-pgp $keya "$file" 2>/dev/null
+
+        if ! git diff --quiet --exit-code "$file"; then
+
+          git commit -m "chore: ajout de la clé OpenPGP $keya" "$file"
+
+        fi
+
       fi
 
     done 
@@ -106,6 +113,13 @@ check_for_main_key_rotation () {
       if [ "$exist" = false ]; then
         echo "Suppression de la clé $keya"
         sops -i --rotate --rm-pgp $keya "$file" 2>/dev/null
+
+        if ! git diff --quiet --exit-code "$file"; then
+
+          git commit -m "chore: suppression de la clé OpenPGP $keya" "$file"
+
+        fi
+
       fi
 
     done 
