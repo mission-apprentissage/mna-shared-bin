@@ -2,22 +2,20 @@
 
 set -euo pipefail
 
-if gpg -k EC088ADC52F85A180F660BF9BB6CD8AE1AABCE36 &>/dev/null; then
+if [ "$AUTHORIZATIONS" == "true" ]; then
+
+  local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.openpgp-keyid"
+  local readonly GITHUB_PUBKEY_FILE="${ROOT_DIR}/.openpgp-pubkey"
+
+else
+
+  local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
+  local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-pubkey"
+
+fi
+
+if gpg -k "${GITHUB_KEYID_FILE}" &>/dev/null; then
   exit 0
 fi
 
-cat << 'EOF' | gpg -q --import 2>/dev/null
------BEGIN PGP PUBLIC KEY BLOCK-----
-
-mDMEaR3fyBYJKwYBBAHaRw8BAQdAemMZ5nV+DqZL15WTkM7qrfA+2sQWoCeYe04q                                                                                                      83uaC4q0L0dpdGh1YiBBY3Rpb25zIDxvcHNAYXBwcmVudGlzc2FnZS5iZXRhLmdv
-dXYuZnI+iJEEExYKADkWIQTsCIrcUvhaGA9mC/m7bNiuGqvONgUCaR3fyAIbAQUJ
-CZ51aAMLBwkDFQgKBBYDAgACHgUCF4AACgkQu2zYrhqrzjY2XwD+Mvc4O90VW+y3
-9J6Gjq1iMCG+t2PdUfBxSbSE99bLakcA/0/WybRpJhl6kV3FgydEw3x2N+h/kXdI
-U6Ul1tOq6LAFuDgEaR3iDxIKKwYBBAGXVQEFAQEHQPVhOrm5RIsS1FnaZtT6eZQR
-uOXfO0dCIC3BZYsflv5cAwEIB4h+BBgWCgAmFiEE7AiK3FL4WhgPZgv5u2zYrhqr
-zjYFAmkd4g8CGwwFCQP5hyEACgkQu2zYrhqrzjawkAD/RNCeqUIek/N8e9E5h1M5
-4U/4hOUGJWBISdCefJyKQTMBAN0IiTwYUtIhMMCAtMYhMU55HNvmNWtjcxSCjBOX
-xj0A
-=mnhr
------END PGP PUBLIC KEY BLOCK-----
-EOF
+gpg -q --import 2>/dev/null "${GITHUB_PUBKEY_FILE}"

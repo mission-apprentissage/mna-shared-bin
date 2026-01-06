@@ -14,7 +14,7 @@ check_for_main_key_rotation () {
 
   local modified=false
 
- if [ "$AUTHORIZATIONS" == "true" ]; then
+  if [ "$AUTHORIZATIONS" == "true" ]; then
     local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.openpgp-keyid"
   else
     local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
