@@ -128,11 +128,9 @@ HABILITATIONS_NEW_HASH=$(openssl dgst -sha256 -r "$HABILITATIONS_FILE" \
 
 if [ "$HABILITATIONS_HASH" != "HABILITATIONS_NEW_HASH" ]; then
 
-  readonly product=$(git rev-parse --abbrev-ref HEAD)
-
   git -C .infra/authorizations/ add habilitations.yml
   git -C .infra/authorizations/ commit -m "chore: mise à jour des habilitations"
-  git -C .infra/authorizations/ push origin HEAD:$product
+  git -C .infra/authorizations/ push origin HEAD:$PRODUCT_NAME
 
   git commit -m "chore: mise à jour des habilitations" .infra/authorizations
 
