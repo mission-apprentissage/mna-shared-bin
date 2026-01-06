@@ -2,23 +2,13 @@
 
 set -euo pipefail
 
-if [ "$AUTHORIZATIONS" == "true" ]; then
-  readonly HABILITATIONS_FILE="${ROOT_DIR}/habilitations.yml"
-else
-  readonly HABILITATIONS_FILE="${ROOT_DIR}/.infra/authorizations/habilitations.yml"
-fi
+readonly HABILITATIONS_FILE="${ROOT_DIR}/.infra/authorizations/habilitations.yml"
 
 "${SCRIPT_SHARED_DIR}/gpg-import-github-pubkey.sh"
 
 check_for_main_key_rotation () {
 
-  local modified=false
-
-  if [ "$AUTHORIZATIONS" == "true" ]; then
-    local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.openpgp-keyid"
-  else
-    local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
-  fi
+  local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
 
   if [ ! -f "$GITHUB_KEYID_FILE" ]; then
     echo "Le fichier $GITHUB_KEYID_FILE est manquant !"
@@ -56,16 +46,6 @@ check_for_main_key_rotation () {
 
   for file in "$HABILITATIONS_FILE" .infra/env.*.yml; do
 
-    if [ "$file" == "$HABILITATIONS_FILE" ] \
-      && [ "$AUTHORIZATIONS" == "false" ]; then
-      continue
-    fi
-
-    if [ "$file" != "$HABILITATIONS_FILE" ] \
-      && [ "$AUTHORIZATIONS" == "true" ]; then
-      continue
-    fi
-
     if [ ! -f $file ]; then
       continue 
     fi
@@ -102,7 +82,6 @@ check_for_main_key_rotation () {
       if [ "$exist" = false ]; then
         echo "Ajout de la clé $keya"
         sops -i --rotate --add-pgp $keya "$file" 2>/dev/null
-        modified=true
       fi
 
     done 
@@ -127,7 +106,6 @@ check_for_main_key_rotation () {
       if [ "$exist" = false ]; then
         echo "Suppression de la clé $keya"
         sops -i --rotate --rm-pgp $keya "$file" 2>/dev/null
-        modified=true
       fi
 
     done 
@@ -136,39 +114,28 @@ check_for_main_key_rotation () {
 
   done 
 
-
-  if [ "$AUTHORIZATIONS" == "true" ] \
-    && [ "$modified" == "true" ]; then
-
-    local readonly product=$(git rev-parse --abbrev-ref HEAD)
-
-    echo "Il est nécessaire de réaliser les actions suivantes sur le dépôt Git du projet '$product'"
-    echo
-    echo "  $ .bin/mna product:access:update"
-    echo "  $ git commit -m \"chore: mise à jour des habilitations\" .infra/authorizations/habilitations.yml"
-    echo "  $ git push"
-  fi
-
 }
 
 HABILITATIONS_HASH=$(openssl dgst -sha256 -r "$HABILITATIONS_FILE" \
   | cut -d' ' -f 1)
 
-if [ "$AUTHORIZATIONS" == "true" ]; then
+git submodule update --recursive --remote --init --force "${ROOT_DIR}/.infra/authorizations"
 
-  sops "$HABILITATIONS_FILE"
-
-else
-
-  git submodule update --recursive --init "${ROOT_DIR}/.infra/authorizations"
-  git submodule update --recursive --remote "${ROOT_DIR}/.infra/authorizations"
-
-fi
+sops "$HABILITATIONS_FILE"
 
 HABILITATIONS_NEW_HASH=$(openssl dgst -sha256 -r "$HABILITATIONS_FILE" \
   | cut -d' ' -f 1)
 
 if [ "$HABILITATIONS_HASH" != "HABILITATIONS_NEW_HASH" ]; then
+
+  local readonly product=$(git rev-parse --abbrev-ref HEAD)
+
+  git -C .infra/authorizations/ add habilitations.yml
+  git -C .infra/authorizations/ commit -m "chore: mise à jour des habilitations"
+  git -C .infra/authorizations/ push origin HEAD:$product
+
+  git commit -m "chore: mise à jour des habilitations" .infra/authorizations
+
   check_for_main_key_rotation
 fi
 

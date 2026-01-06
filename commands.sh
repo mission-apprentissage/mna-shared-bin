@@ -2,12 +2,6 @@
 
 set -euo pipefail
 
-if [ "$(git remote get-url origin)" == "git@github.com:mission-apprentissage/mna-shared-authorizations.git" ]; then
-  export AUTHORIZATIONS=true
-else
-  export AUTHORIZATIONS=false
-fi
-
 function app:deploy() {
   "${SCRIPT_SHARED_DIR}/app-deploy.sh" "$@"
 }
