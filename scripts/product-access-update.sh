@@ -128,12 +128,13 @@ HABILITATIONS_NEW_HASH=$(openssl dgst -sha256 -r "$HABILITATIONS_FILE" \
 
 if [ "$HABILITATIONS_HASH" != "HABILITATIONS_NEW_HASH" ]; then
 
+  check_for_main_key_rotation
+
   git -C .infra/authorizations/ add habilitations.yml
   git -C .infra/authorizations/ commit -m "chore: mise à jour des habilitations"
   git -C .infra/authorizations/ push origin HEAD:$PRODUCT_NAME
 
   git commit -m "chore: mise à jour des habilitations" .infra/authorizations
 
-  check_for_main_key_rotation
 fi
 
