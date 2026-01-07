@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-readonly HABILITATIONS_FILE="${ROOT_DIR}/.infra/authorizations/habilitations.yml"
+readonly HABILITATIONS_FILE=".infra/authorizations/habilitations.yml"
 
 "${SCRIPT_SHARED_DIR}/gpg-import-github-pubkey.sh"
 
@@ -80,12 +80,18 @@ check_for_main_key_rotation () {
       done
 
       if [ "$exist" = false ]; then
+
         echo "Ajout de la clé $keya"
+
         sops -i --rotate --add-pgp $keya "$file" 2>/dev/null
 
-        if ! git diff --quiet --exit-code "$file"; then
+        if [ "$file" != "$HABILITATIONS_FILE" ]; then
 
-          git commit -m "chore: ajout de la clé OpenPGP $keya" "$file"
+          if ! git diff --quiet --no-textconv --exit-code "$file"; then
+
+            git commit -m "chore: ajout de la clé $keya de $file" "$file"
+
+          fi
 
         fi
 
@@ -111,12 +117,18 @@ check_for_main_key_rotation () {
       done
 
       if [ "$exist" = false ]; then
+
         echo "Suppression de la clé $keya"
+
         sops -i --rotate --rm-pgp $keya "$file" 2>/dev/null
 
-        if ! git diff --quiet --exit-code "$file"; then
+        if [ "$file" != "$HABILITATIONS_FILE" ]; then
 
-          git commit -m "chore: suppression de la clé OpenPGP $keya" "$file"
+          if ! git diff --quiet --no-textconv --exit-code "$file"; then
+
+            git commit -m "chore: suppression de la clé $keya de $file" "$file"
+
+          fi
 
         fi
 
