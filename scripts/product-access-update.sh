@@ -17,7 +17,7 @@ check_for_main_key_rotation () {
 
   GITHUB_KEYID=$(head -n 1 "$GITHUB_KEYID_FILE" | awk '{print $1}')
 
-  local recipients=("$GITHUB_KEYID")
+  local recipients=("$GITHUB_KEYID!")
 
   echo "Extraction des clés OpenPGP du fichier d'habilitations..."
 
