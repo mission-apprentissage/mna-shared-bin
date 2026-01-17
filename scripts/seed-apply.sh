@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [ -z "${1:-}" ]; then
-  readonly TARGET_DB="mongodb://__system:password@localhost:27017/mna-bal?authSource=local&directConnection=true"
+  readonly TARGET_DB="mongodb://__system:password@localhost:27017/?authSource=local&directConnection=true"
 else
   readonly TARGET_DB="$1"
   shift
@@ -14,7 +14,6 @@ echo "Base de données cible: $TARGET_DB"
 readonly SEED_GPG="$ROOT_DIR/.infra/files/configs/mongodb/seed.gpg"
 readonly SEED_GZ="$ROOT_DIR/.infra/files/configs/mongodb/seed.gz"
 readonly PASSPHRASE="$ROOT_DIR/.bin/SEED_PASSPHRASE.txt"
-readonly VAULT_FILE="${ROOT_DIR}/.infra/vault/vault.yml"
 
 read -p "La base de données va être écrasée, voulez-vous continuer ? [y/N]: " response
 
