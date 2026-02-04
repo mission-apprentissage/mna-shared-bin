@@ -6,44 +6,25 @@ if [ -z "${1:-}" ]; then
   readonly TARGET_DB="mongodb://__system:password@localhost:27017/?authSource=local&directConnection=true"
 else
   readonly TARGET_DB="$1"
-  shift
 fi
 
 echo "Base de données cible: $TARGET_DB"
 
 readonly SEED_GPG="$ROOT_DIR/.infra/files/configs/mongodb/seed.gpg"
-readonly SEED_GZ="$ROOT_DIR/.infra/files/configs/mongodb/seed.gz"
-readonly PASSPHRASE="$ROOT_DIR/.bin/SEED_PASSPHRASE.txt"
 
-read -p "La base de données va être écrasée, voulez-vous continuer ? [y/N]: " response
+readonly PASSPHRASE="$(sops \
+                        --decrypt \
+                        --extract '["SEED_GPG_PASSPHRASE"]' \
+                        .infra/env.global.yml)"
 
-case $response in
-  [yY][eE][sS]|[yY])
-    ;;
-  *)
-    exit 1
-;;
-esac
-
-delete_cleartext() {
-
-  if [ -f "$SEED_GZ" ]; then
-    shred -f -n 10 -u "$SEED_GZ"
-  fi
-
-  if [ -f "$PASSPHRASE" ]; then
-    shred -f -n 10 -u "$PASSPHRASE"
-  fi
-
-}
-
-trap delete_cleartext EXIT
-
-sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml > "$PASSPHRASE"
-
-rm -f "$SEED_GZ"
-gpg -d --batch --passphrase-file "$PASSPHRASE" -o "$SEED_GZ" "$SEED_GPG"
-cat "$SEED_GZ" | docker compose -f "$ROOT_DIR/docker-compose.yml" exec -iT mongodb mongorestore --archive --nsInclude="mna-bal.*" --uri="${TARGET_DB}" --drop --gzip
+gpg -d --batch --passphrase "$PASSPHRASE" "$SEED_GPG" \
+    | docker compose -f "$ROOT_DIR/docker-compose.yml" exec -iT mongodb \
+      mongorestore \
+        --archive \
+        --nsInclude="${PRODUCT_NAME}.*" \
+        --uri="${TARGET_DB}" \
+        --drop \
+        --gzip
 
 yarn build:dev
 yarn cli migrations:up
