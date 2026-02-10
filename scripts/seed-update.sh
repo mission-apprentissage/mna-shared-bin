@@ -10,9 +10,7 @@ fi
 
 echo "Base de données cible: $TARGET_DB"
 
-read \
-  -p "La base de données contient-elle des données sensibles ? [Y/n]: " \
-  response
+read -p "La base de données contient-elle des données sensibles ? [Y/n]: " response
 
 case $response in
   [nN][oO]|[nN])
@@ -24,10 +22,7 @@ esac
 
 readonly SEED_GPG="$ROOT_DIR/.infra/files/configs/mongodb/seed.gpg"
 
-readonly PASSPHRASE="$(sops \
-                        --decrypt \
-                        --extract '["SEED_GPG_PASSPHRASE"]' \
-                        .infra/env.global.yml)"
+readonly PASSPHRASE="$(sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml)"
 
 docker compose -f "$ROOT_DIR/docker-compose.yml" up mongodb -d
 
