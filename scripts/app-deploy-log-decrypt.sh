@@ -16,19 +16,10 @@ else
   shift
 fi
 
-readonly PASSPHRASE="$ROOT_DIR/.bin/SEED_PASSPHRASE.txt"
-
-delete_cleartext() {
-  if [ -f "$PASSPHRASE" ]; then
-    shred -f -n 10 -u "$PASSPHRASE"
-  fi
-}
-trap delete_cleartext EXIT
-
 rm -f /tmp/deploy.log.gpg
 
 gh run download "$RUN_ID" -n "logs-$JOB_ID" -D /tmp
 
-sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml > "$PASSPHRASE"
+readonly PASSPHRASE=$(sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml)
 
-gpg -d --batch --passphrase-file "$PASSPHRASE" /tmp/deploy.log.gpg
+gpg -d --batch --passphrase "$PASSPHRASE" /tmp/deploy.log.gpg

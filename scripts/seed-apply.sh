@@ -12,10 +12,7 @@ echo "Base de données cible: $TARGET_DB"
 
 readonly SEED_GPG="$ROOT_DIR/.infra/files/configs/mongodb/seed.gpg"
 
-readonly PASSPHRASE="$(sops \
-                        --decrypt \
-                        --extract '["SEED_GPG_PASSPHRASE"]' \
-                        .infra/env.global.yml)"
+readonly PASSPHRASE="$(sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml)"
 
 gpg -d --batch --passphrase "$PASSPHRASE" "$SEED_GPG" \
     | docker compose -f "$ROOT_DIR/docker-compose.yml" exec -iT mongodb \
