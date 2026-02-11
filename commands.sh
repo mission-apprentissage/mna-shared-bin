@@ -6,19 +6,17 @@ declare -A _meta_help
 
 function _help() {
 
-	mapfile -d '' sorted < <(printf '%s\0' "${!_meta_help[@]}" | sort -z)
+  mapfile -d '' sorted < <(printf '%s\0' "${!_meta_help[@]}" | sort -z)
 
-	echo -e "Commands\n"
+  echo -e "Commands\n"
 
-	for key in "${sorted[@]}"; do
-		echo -e "  ${key}"
-		echo -e "    \`-> ${_meta_help[$key]}"
-		echo
-	done
+  for key in "${sorted[@]}"; do
+    printf "%-30s %s\n" "${key}" "${_meta_help[$key]}"
+  done
 
 }
 
-_meta_help["app:deploy <env> [--user <username>]"]="Deploy application to <env>"
+_meta_help["app:deploy"]="Deploy application to <env>"
 
 function app:deploy() {
   "${SCRIPT_SHARED_DIR}/app-deploy.sh" "$@"
@@ -123,7 +121,7 @@ function seed:update() {
   "${SCRIPT_SHARED_DIR}/seed-update.sh" "$@"
 }
 
-_meta_help["vault:edit [<env>]"]="Edit SOPS env.global.yml or env.<env>.yml file"
+_meta_help["vault:edit"]="Edit SOPS env.global.yml or env.<env>.yml file"
 
 function vault:edit() {
   editor=${EDITOR:-'code -w'}
