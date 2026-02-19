@@ -38,6 +38,7 @@ docker compose -f "$ROOT_DIR/docker-compose.yml" exec -iT mongodb \
     --uri "$TARGET_DB" \
     --gzip \
     --archive \
+    --numParallelCollections 2 \
     | gpg -c \
         --cipher-algo twofish \
         --batch \
