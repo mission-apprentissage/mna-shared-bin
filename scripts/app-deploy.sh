@@ -10,7 +10,7 @@ function deploy() {
 
   if [[ "$ENV_FILTER" == "preview" ]]; then
     readonly PR_NUMBER=${1:?"Merci de préciser le numéro de la Pull Request (ex. 33)"};
-    shift;
+    shift
 
     if ! [[ $PR_NUMBER =~ ^[0-9]+$ ]]; then
       echo "Merci de préciser le numéro de la Pull Request (ex. 33)" >&2;

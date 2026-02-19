@@ -24,7 +24,6 @@ esac
 readonly SEED_GPG="$ROOT_DIR/.infra/files/configs/mongodb/seed.gpg"
 readonly SEED_GZ="$ROOT_DIR/.infra/files/configs/mongodb/seed.gz"
 readonly PASSPHRASE="$ROOT_DIR/.bin/SEED_PASSPHRASE.txt"
-readonly VAULT_FILE="${ROOT_DIR}/.infra/vault/vault.yml"
 
 delete_cleartext() {
 
