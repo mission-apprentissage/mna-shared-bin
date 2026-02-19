@@ -4,6 +4,20 @@ set -euo pipefail
 
 declare -A _meta_help
 
+function _help() {
+
+	mapfile -d '' sorted < <(printf '%s\0' "${!_meta_help[@]}" | sort -z)
+
+	echo -e "Commands\n"
+
+	for key in "${sorted[@]}"; do
+		echo -e "  ${key}"
+		echo -e "    \`-> ${_meta_help[$key]}"
+		echo
+	done
+
+}
+
 _meta_help["app:deploy <env> [--user <username>]"]="Deploy application to <env>"
 
 function app:deploy() {
