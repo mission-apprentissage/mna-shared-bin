@@ -18,7 +18,7 @@ gpg -d --batch --passphrase "$PASSPHRASE" "$SEED_GPG" \
     | docker compose -f "$ROOT_DIR/docker-compose.yml" exec -iT mongodb \
       mongorestore \
         --archive \
-        --nsInclude="${PRODUCT_NAME}.*" \
+        --nsInclude="*.*" \
         --uri="${TARGET_DB}" \
         --drop \
         --gzip
