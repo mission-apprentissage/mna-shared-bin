@@ -2,13 +2,24 @@
 
 set -euo pipefail
 
-readonly HABILITATIONS_FILE="${ROOT_DIR}/.infra/habilitations.yml"
+readonly HABILITATIONS_FILE=".infra/authorizations/habilitations.yml"
+
+"${SCRIPT_SHARED_DIR}/gpg-import-github-pubkey.sh"
 
 check_for_main_key_rotation () {
 
-  echo "Extraction des clés OpenPGP du fichier d'habilitations..."
+  local readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
 
-  local recipients=("81A71F4AC20118D7FFF80549E2D8A0E8FDCCE990")
+  if [ ! -f "$GITHUB_KEYID_FILE" ]; then
+    echo "Le fichier $GITHUB_KEYID_FILE est manquant !"
+    exit 1
+  fi
+
+  GITHUB_KEYID=$(head -n 1 "$GITHUB_KEYID_FILE" | awk '{print $1}')
+
+  local recipients=("$GITHUB_KEYID!")
+
+  echo "Extraction des clés OpenPGP du fichier d'habilitations..."
 
   mapfile -t keys < <( \
     sops --decrypt "${HABILITATIONS_FILE}" \
@@ -33,7 +44,7 @@ check_for_main_key_rotation () {
 
   echo "-------------------------------------------------------"
 
-  for file in .infra/habilitations.yml .infra/env.yml .infra/env.*.yml; do
+  for file in "$HABILITATIONS_FILE" .infra/env.*.yml; do
 
     if [ ! -f $file ]; then
       continue 
@@ -69,8 +80,21 @@ check_for_main_key_rotation () {
       done
 
       if [ "$exist" = false ]; then
+
         echo "Ajout de la clé $keya"
+
         sops -i --rotate --add-pgp $keya "$file" 2>/dev/null
+
+        if [ "$file" != "$HABILITATIONS_FILE" ]; then
+
+          if ! git diff --quiet --no-textconv --exit-code "$file"; then
+
+            git commit -m "chore: ajout de la clé $keya de $file" "$file"
+
+          fi
+
+        fi
+
       fi
 
     done 
@@ -93,8 +117,21 @@ check_for_main_key_rotation () {
       done
 
       if [ "$exist" = false ]; then
+
         echo "Suppression de la clé $keya"
+
         sops -i --rotate --rm-pgp $keya "$file" 2>/dev/null
+
+        if [ "$file" != "$HABILITATIONS_FILE" ]; then
+
+          if ! git diff --quiet --no-textconv --exit-code "$file"; then
+
+            git commit -m "chore: suppression de la clé $keya de $file" "$file"
+
+          fi
+
+        fi
+
       fi
 
     done 
@@ -108,12 +145,22 @@ check_for_main_key_rotation () {
 HABILITATIONS_HASH=$(openssl dgst -sha256 -r "$HABILITATIONS_FILE" \
   | cut -d' ' -f 1)
 
+git submodule update --recursive --remote --init --force "${ROOT_DIR}/.infra/authorizations"
+
 sops "$HABILITATIONS_FILE"
 
 HABILITATIONS_NEW_HASH=$(openssl dgst -sha256 -r "$HABILITATIONS_FILE" \
   | cut -d' ' -f 1)
 
 if [ "$HABILITATIONS_HASH" != "HABILITATIONS_NEW_HASH" ]; then
+
   check_for_main_key_rotation
+
+  git -C .infra/authorizations/ add habilitations.yml
+  git -C .infra/authorizations/ commit -m "chore: mise à jour des habilitations"
+  git -C .infra/authorizations/ push origin HEAD:$PRODUCT_NAME
+
+  git commit -m "chore: mise à jour des habilitations" .infra/authorizations
+
 fi
 

@@ -23,3 +23,12 @@ function product:access:update() {
   editor=${EDITOR:-'code -w'}
   EDITOR=$editor "${SCRIPT_SHARED_DIR}/product-access-update.sh"
 }
+
+function seed:update() {
+  "${SCRIPT_SHARED_DIR}/seed-update.sh" "$@"
+}
+
+function seed:apply() {
+  "${SCRIPT_SHARED_DIR}/seed-apply.sh" "$@"
+}
+
