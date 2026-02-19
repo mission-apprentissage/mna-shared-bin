@@ -32,11 +32,13 @@ yarn build:dev
 yarn cli migrations:up
 yarn cli indexes:recreate
 
+rm -f "$SEED_GPG"
 docker compose -f "$ROOT_DIR/docker-compose.yml" exec -iT mongodb \
   mongodump \
     --uri "$TARGET_DB" \
     --gzip \
     --archive \
+    --numParallelCollections 2 \
     | gpg -c \
         --cipher-algo twofish \
         --batch \
