@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+function app:deploy() {
+  "${SCRIPT_SHARED_DIR}/app-deploy.sh" "$@"
+}
+
+function app:deploy:log:encrypt() {
+  (cd "$ROOT_DIR" && "${SCRIPT_SHARED_DIR}/app-deploy-log-encrypt.sh" "$@")
+}
+
+function app:deploy:log:decrypt() {
+  (cd "$ROOT_DIR" && "${SCRIPT_SHARED_DIR}/app-deploy-log-decrypt.sh" "$@")
+}
+
+function vault:edit() {
+  editor=${EDITOR:-'code -w'}
+  EDITOR=$editor "${SCRIPT_SHARED_DIR}/vault-edit.sh" "$@"
+}
+
+function product:access:update() {
+  editor=${EDITOR:-'code -w'}
+  EDITOR=$editor "${SCRIPT_SHARED_DIR}/product-access-update.sh"
+}
