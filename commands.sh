@@ -2,7 +2,41 @@
 
 set -euo pipefail
 
-declare -A _meta_help
+[[ -v _meta_help ]] || declare -A _meta_help
+[[ -v _registry ]]  || declare -A _registry
+
+function _register() {
+
+  local cmd="$1"
+  local fn="${2:-_shared_${1//[: ]/_}}"
+  local help_var="${fn}__help"
+
+  _meta_help["$cmd"]="${!help_var:-"(no description)"}"
+  _registry["$cmd"]="$fn"
+
+}
+
+function _dispatch() {
+
+  local cmd="${1:-}"
+  
+  if [[ -z "$cmd" ]]; then
+    _help
+    return 0
+  fi
+
+  shift
+  local fn="${_registry[$cmd]:-}"
+
+  if [[ -z "$fn" ]]; then
+    echo "Err: Command '$cmd' not found" >&2
+    _help
+    return 1
+  fi
+
+  "$fn" "${@:-}"
+
+}
 
 function _help() {
 
@@ -16,27 +50,61 @@ function _help() {
 
 }
 
-_meta_help["app:deploy"]="Deploy application to <env>"
+################################################################################
+# Shared commands
+################################################################################
 
-function app:deploy() {
-  "${SCRIPT_SHARED_DIR}/app-deploy.sh" "$@"
+_shared_app_deploy__help="Deploy application to <env>"
+function _shared_app_deploy() {
+  "${SCRIPTS_SHARED_DIR}/app-deploy.sh" "$@"
 }
 
-_meta_help["app:deploy:log:decrypt"]="Decrypt Github Actions Ansible logs"
+_shared_app_deploy_log_decrypt__help="Decrypt Github Actions Ansible logs"
 
-function app:deploy:log:decrypt() {
-  (cd "$ROOT_DIR" && "${SCRIPT_SHARED_DIR}/app-deploy-log-decrypt.sh" "$@")
+function _shared_app_deploy_log_decrypt() {
+  (cd "$ROOT_DIR" && "${SCRIPTS_SHARED_DIR}/app-deploy-log-decrypt.sh" "$@")
 }
 
-_meta_help["app:deploy:log:encrypt"]="Encrypt Github Actions Ansible logs"
+_shared_app_deploy_log_encrypt__help="Encrypt Github Actions Ansible logs"
 
-function app:deploy:log:encrypt() {
-  (cd "$ROOT_DIR" && "${SCRIPT_SHARED_DIR}/app-deploy-log-encrypt.sh" "$@")
+function _shared_app_deploy_log_encrypt() {
+  (cd "$ROOT_DIR" && "${SCRIPTS_SHARED_DIR}/app-deploy-log-encrypt.sh" "$@")
 }
 
-_meta_help["dev:setup"]="Install mna-${PRODUCT_NAME} binary with zsh completion on system"
+_shared_dev_dependencies_check__help="Check dependencies on system"
 
-function dev:setup() {
+function _shared_dev_dependencies_check() {
+  "${SCRIPTS_SHARED_DIR}/dev-dependencies-check.sh" "$@"
+}
+
+_shared_vault_edit__help="Edit SOPS env.global.yml or env.<env>.yml file"
+
+function _shared_vault_edit() {
+  editor=${EDITOR:-'code -w'}
+  EDITOR=$editor "${SCRIPTS_SHARED_DIR}/vault-edit.sh" "$@"
+}
+
+_shared_docker_login__help="Login to ghcr.io"
+
+function _shared_docker_login() {
+  "${SCRIPTS_SHARED_DIR}/docker-login.sh" "$@"
+}
+
+_shared_seed_apply__help="Apply seed to a database"
+
+function _shared_seed_apply() {
+  "${SCRIPTS_SHARED_DIR}/seed-apply.sh" "$@"
+}
+
+_shared_seed_update__help="Update seed using a database"
+
+function _shared_seed_update() {
+  "${SCRIPTS_SHARED_DIR}/seed-update.sh" "$@"
+}
+
+_shared_dev_setup__help="Install binary with zsh completion on system"
+
+function _shared_dev_setup() {
 
   mapfile -d '' sorted < <(printf '%s\0' "${!_meta_help[@]}" | sort -z)
 
@@ -71,12 +139,12 @@ function dev:setup() {
     # _describe 'command' commands
   }
 
-  _mna-${PRODUCT_NAME}_completion "\$@"
+  _product-${PRODUCT_NAME}_completion "\$@"
   EOF
 
   printf '%s' "${message[@]#  }" >> /tmp/${PRODUCT_NAME}-zsh-completion
 
-  sudo ln -fs "${ROOT_DIR}/.bin/mna-${PRODUCT_NAME}" \
+  sudo ln -fs "${ROOT_DIR}/.bin/mna" \
     /usr/local/bin/mna-${PRODUCT_NAME}
 
   sudo mkdir -p /usr/local/share/zsh/site-functions
@@ -88,43 +156,5 @@ function dev:setup() {
 
   rm /tmp/${PRODUCT_NAME}-zsh-completion
 
-}
-
-_meta_help["dev:dependencies:check"]="Check dependencies on system"
-
-function dev:dependencies:check() {
-  "${SCRIPT_SHARED_DIR}/dev-dependencies-check.sh" "$@"
-}
-
-_meta_help["docker:login"]="Login to ghcr.io"
-
-function docker:login() {
-  "${SCRIPT_SHARED_DIR}/docker-login.sh" "$@"
-}
-
-_meta_help["product:access:update"]="Update product access"
-
-function product:access:update() {
-  editor=${EDITOR:-'code -w'}
-  EDITOR=$editor "${SCRIPT_SHARED_DIR}/product-access-update.sh"
-}
-
-_meta_help["seed:apply"]="Apply seed to a database"
-
-function seed:apply() {
-  "${SCRIPT_SHARED_DIR}/seed-apply.sh" "$@"
-}
-
-_meta_help["seed:update"]="Update seed using a database"
-
-function seed:update() {
-  "${SCRIPT_SHARED_DIR}/seed-update.sh" "$@"
-}
-
-_meta_help["vault:edit"]="Edit SOPS env.global.yml or env.<env>.yml file"
-
-function vault:edit() {
-  editor=${EDITOR:-'code -w'}
-  EDITOR=$editor "${SCRIPT_SHARED_DIR}/vault-edit.sh" "$@"
 }
 

@@ -18,9 +18,9 @@ function deploy() {
       exit 1
     fi
 
-    "${SCRIPT_SHARED_DIR}/run-playbook.sh" "preview.yml" "$ENV_FILTER" --extra-var "pr_number=$PR_NUMBER"
+    "${SCRIPTS_SHARED_DIR}/run-playbook.sh" "preview.yml" "$ENV_FILTER" --extra-var "pr_number=$PR_NUMBER"
   else
-    "${SCRIPT_SHARED_DIR}/run-playbook.sh" "deploy.yml" "$ENV_FILTER" "$@"
+    "${SCRIPTS_SHARED_DIR}/run-playbook.sh" "deploy.yml" "$ENV_FILTER" "$@"
   fi
 }
 

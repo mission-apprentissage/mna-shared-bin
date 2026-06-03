@@ -4,7 +4,7 @@ set -euo pipefail
 
 readonly HABILITATIONS_FILE=".infra/authorizations/habilitations.yml"
 
-"${SCRIPT_SHARED_DIR}/gpg-import-github-pubkey.sh"
+"${SCRIPTS_SHARED_DIR}/gpg-import-github-pubkey.sh"
 
 check_for_main_key_rotation () {
 

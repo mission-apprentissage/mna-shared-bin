@@ -4,16 +4,13 @@ set -euo pipefail
 
 dependencies=(
   "ansible"
+  "bash"
   "gpg"
   "sops"
   "node"
   "shred"
   "yq"
 )
-
-if [[ -z "${CI:-}" ]]; then
-  dependencies+=("op")
-fi
 
 for command in "${dependencies[@]}"; do
   if ! type -p "$command" > /dev/null; then

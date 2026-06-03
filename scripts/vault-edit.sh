@@ -4,7 +4,7 @@ set -euo pipefail
 
 ENVIRONMENT=${1:-}
 
-"${SCRIPT_SHARED_DIR}/gpg-import-github-pubkey.sh"
+"${SCRIPTS_SHARED_DIR}/gpg-import-github-pubkey.sh"
 
 if [ -z $ENVIRONMENT ]; then
   sops "${ROOT_DIR}/.infra/env.global.yml"
