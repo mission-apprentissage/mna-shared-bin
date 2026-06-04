@@ -2,8 +2,13 @@
 
 set -euo pipefail
 
-readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
-readonly GITHUB_PUBKEY_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-pubkey"
+if [ -f ${ROOT_DIR}/.infra/authorizations/.openpgp-keyid ]; then
+	readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-keyid"
+	readonly GITHUB_PUBKEY_FILE="${ROOT_DIR}/.infra/authorizations/.openpgp-pubkey"
+elif [ -f ${ROOT_DIR}/.openpgp-keyid ]; then
+	readonly GITHUB_KEYID_FILE="${ROOT_DIR}/.openpgp-keyid"
+	readonly GITHUB_PUBKEY_FILE="${ROOT_DIR}/.openpgp-pubkey"
+fi
 
 if gpg -k "${GITHUB_KEYID_FILE}" &>/dev/null; then
   exit 0
