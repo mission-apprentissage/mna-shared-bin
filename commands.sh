@@ -40,6 +40,11 @@ function _dispatch() {
 
 function _help() {
 
+  if [[ ${#_meta_help[@]} -eq 0 ]]; then
+    echo "No commands registered."
+    return 0
+  fi
+
   mapfile -d '' sorted < <(printf '%s\0' "${!_meta_help[@]}" | sort -z)
 
   echo -e "Commands\n"
