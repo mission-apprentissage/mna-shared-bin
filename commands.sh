@@ -55,11 +55,8 @@ function _help() {
   echo -e "Commands\n"
 
   for key in "${sorted[@]}"; do
-
     [[ -n "$key" ]] || continue
-
     printf "%-30s %s\n" "${key}" "${_meta_help[$key]}"
-
   done
 
 }
@@ -69,6 +66,7 @@ function _help() {
 ################################################################################
 
 _shared_app_deploy__help="Deploy application to <env>"
+
 function _shared_app_deploy() {
   "${SCRIPTS_SHARED_DIR}/app-deploy.sh" "$@"
 }
