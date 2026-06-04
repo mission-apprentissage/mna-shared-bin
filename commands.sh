@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-[[ -v _meta_help ]] || declare -A _meta_help
-[[ -v _registry ]]  || declare -A _registry
+[[ -v _meta_help ]] || declare -gA _meta_help
+[[ -v _registry ]]  || declare -gA _registry
 
 function _register() {
 
@@ -40,7 +40,12 @@ function _dispatch() {
 
 function _help() {
 
-  if [[ ${#_meta_help[@]} -eq 0 ]]; then
+  if ! declare -p _meta_help &>/dev/null; then
+    echo "No commands registered."
+    return 0
+  fi
+
+  if [[ $(declare -p _meta_help) != *"]="* ]]; then
     echo "No commands registered."
     return 0
   fi
@@ -50,7 +55,11 @@ function _help() {
   echo -e "Commands\n"
 
   for key in "${sorted[@]}"; do
+
+    [[ -n "$key" ]] || continue
+
     printf "%-30s %s\n" "${key}" "${_meta_help[$key]}"
+
   done
 
 }
