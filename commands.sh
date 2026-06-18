@@ -114,6 +114,18 @@ function _shared_seed_update() {
   "${SCRIPTS_SHARED_DIR}/seed-update.sh" "$@"
 }
 
+_shared_sops_git_setup__help="Configure git SOPS merge driver & diff (once per clone)"
+
+function _shared_sops_git_setup() {
+  "${SCRIPTS_SHARED_DIR}/sops-git-setup.sh" "$@"
+}
+
+_shared_sops_updatekeys__help="Re-sync SOPS recipients from .sops.yaml into env.*.yml metadata"
+
+function _shared_sops_updatekeys() {
+  (cd "$ROOT_DIR" && "${SCRIPTS_SHARED_DIR}/sops-updatekeys.sh" "$@")
+}
+
 _shared_dev_setup__help="Install binary with zsh completion on system"
 
 function _shared_dev_setup() {
