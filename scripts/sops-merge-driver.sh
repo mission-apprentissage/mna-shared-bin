@@ -33,11 +33,29 @@ trap 'rm -rf "$TMPDIR"' EXIT
 # Déchiffrement des trois versions.
 # --filename-override : git fournit des fichiers temporaires SANS extension ;
 # on force le type (input + output) via le chemin réel, sinon sops ne sait pas
-# parser le YAML et le fallback copierait le ciphertext (→ faux conflits).
-# Fallback `cp` uniquement pour un ancêtre absent/vide (add/add).
-sops decrypt --filename-override "$FILEPATH" "$BASE"   > "$TMPDIR/base"   2>/dev/null || cp "$BASE"   "$TMPDIR/base"
-sops decrypt --filename-override "$FILEPATH" "$OURS"   > "$TMPDIR/ours"   2>/dev/null || cp "$OURS"   "$TMPDIR/ours"
-sops decrypt --filename-override "$FILEPATH" "$THEIRS" > "$TMPDIR/theirs" 2>/dev/null || cp "$THEIRS" "$TMPDIR/theirs"
+# parser le YAML.
+# IMPORTANT : on n'autorise PAS de fallback sur du ciphertext pour ours/theirs.
+# Si le déchiffrement échoue (clés manquantes, fichier corrompu), on échoue franchement
+# plutôt que de fusionner/rechiffrer du chiffré (résultat silencieusement faux).
+# Seul l'ancêtre peut être légitimement vide (add/add sans base commune).
+if [ -s "$BASE" ]; then
+  sops decrypt --filename-override "$FILEPATH" "$BASE" > "$TMPDIR/base" 2>/dev/null || {
+    echo "sops-merge-driver: impossible de déchiffrer l'ancêtre de $FILEPATH" >&2
+    exit 1
+  }
+else
+  : > "$TMPDIR/base"
+fi
+
+sops decrypt --filename-override "$FILEPATH" "$OURS" > "$TMPDIR/ours" 2>/dev/null || {
+  echo "sops-merge-driver: impossible de déchiffrer la version courante (ours) de $FILEPATH — clés manquantes ?" >&2
+  exit 1
+}
+
+sops decrypt --filename-override "$FILEPATH" "$THEIRS" > "$TMPDIR/theirs" 2>/dev/null || {
+  echo "sops-merge-driver: impossible de déchiffrer la version entrante (theirs) de $FILEPATH — clés manquantes ?" >&2
+  exit 1
+}
 
 # Fusion 3-way sur le clair. git merge-file écrit dans "$TMPDIR/ours"
 # et renvoie un code != 0 s'il reste des conflits.
