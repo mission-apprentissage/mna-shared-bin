@@ -6,7 +6,7 @@
 # Repose sur :
 #   - .gitattributes : `.infra/env.*.yml diff=sopsdiffer merge=sops`
 #   - scripts/sops-merge-driver.sh (ce sous-module)
-#   - un .sops.yaml à la racine du repo (creation_rules)
+# Aucun .sops.yaml requis : les clés viennent des métadonnées des fichiers.
 
 set -euo pipefail
 

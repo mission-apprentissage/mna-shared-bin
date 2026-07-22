@@ -120,10 +120,10 @@ function _shared_sops_git_setup() {
   "${SCRIPTS_SHARED_DIR}/sops-git-setup.sh" "$@"
 }
 
-_shared_sops_updatekeys__help="Re-sync SOPS recipients from .sops.yaml into env.*.yml metadata"
+_shared_sops_rotate__help="Rotate SOPS data key and/or add/remove PGP recipients (no .sops.yaml needed)"
 
-function _shared_sops_updatekeys() {
-  (cd "$ROOT_DIR" && "${SCRIPTS_SHARED_DIR}/sops-updatekeys.sh" "$@")
+function _shared_sops_rotate() {
+  (cd "$ROOT_DIR" && "${SCRIPTS_SHARED_DIR}/sops-rotate.sh" "$@")
 }
 
 _shared_dev_setup__help="Install binary with zsh completion on system"
