@@ -20,6 +20,13 @@ rm -f /tmp/deploy.log.gpg
 
 gh run download "$RUN_ID" -n "logs-$JOB_ID" -D /tmp
 
-readonly PASSPHRASE=$(sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml)
+PASSPHRASE="$(sops --decrypt --extract '["SEED_GPG_PASSPHRASE"]' .infra/env.global.yml)"
+readonly PASSPHRASE
 
-gpg -d --batch --passphrase "$PASSPHRASE" /tmp/deploy.log.gpg
+if [ -z "${PASSPHRASE}" ]; then
+  echo "SEED_GPG_PASSPHRASE vide, abandon du déchiffrement des journaux." >&2
+  exit 1
+fi
+
+printf '%s' "${PASSPHRASE}" | gpg --batch --pinentry-mode loopback \
+  --passphrase-fd 0 --decrypt /tmp/deploy.log.gpg
